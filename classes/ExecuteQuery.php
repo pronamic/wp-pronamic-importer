@@ -11,7 +11,7 @@ class ExecuteQuery extends ImportAction {
 
 		$import->log(sprintf('Executing query: "%s" &hellip;', $this->query));
 
-		$result = $statement->execute(array(':legacy_id' => $import->getPostMeta('_legacy_id')));
+		$result = $statement->execute(array(':import_id' => $import->getPostMeta('_import_id')));
 
 		if($result) {
 			$this->next($import);

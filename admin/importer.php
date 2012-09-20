@@ -36,6 +36,10 @@
 			nws_descr != ''
 				AND
 			nws_timestamp IS NOT NULL 
+				AND
+			wordpress_imported = 0
+				AND
+			wordpress_failed = 0
 		ORDER BY
 			news.nws_timestamp ASC
 		LIMIT

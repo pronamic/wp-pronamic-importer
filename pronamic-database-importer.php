@@ -127,7 +127,7 @@ function pronamic_db_importer_create($pdo) {
 
 	$importer->next(new SetPostStatus('publish'));
 
-	$importer->next(new SetMetaImportUrl('_legacy_url'));
+	$importer->next(new SetMetaImportUrl('_import_url'));
 
 	$importer->next(new SetDateIfNotSet());
 	$importer->next(new SetPostDate());
@@ -170,7 +170,7 @@ function pronamic_db_importer_create($pdo) {
 	
 	$importer->next(new VarDumpImport());
 
-	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_imported = TRUE WHERE nws_id = :legacy_id;'));
+	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_imported = TRUE WHERE nws_id = :import_id;'));
 
 	$importer->next(new Done());
 
@@ -203,7 +203,7 @@ function horses_importer_get_import_info_from_id($pdo, $id) {
 
 	$importInfo->setDate($date);
 
-	$importInfo->setPostMeta('_legacy_id', $content->nws_id);
+	$importInfo->setPostMeta('_import_id', $content->nws_id);
 
 	$importInfo->addTerm(new TermInfo('category', $content->cat_title));
 

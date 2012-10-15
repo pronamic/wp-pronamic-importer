@@ -2,13 +2,7 @@
 
 $pdo = Pronamic_DatabaseImporter_Plugin::get_database();
 
-horses_importer_try_import(); ?>
-
-<h3>
-	<?php _e('News', 'horses_importer'); ?>	
-</h3>
-
-<?php
+horses_importer_try_import(); 
 
 $query = "
 	SELECT

@@ -8,7 +8,7 @@ Version: 0.1
 Text Domain: pronamic_db_importer
 */
 
-ini_set('max_execution_time', 3600); // 300 seconds = 5 minutes
+ini_set( 'max_execution_time', 3600 ); // 300 seconds = 5 minutes
 
 require_once ABSPATH . 'wp-admin/includes/import.php';
 require_once __DIR__ . '/phpQuery/phpQuery/phpQuery.php';
@@ -38,8 +38,6 @@ class Pronamic_Database_Importer extends WP_Importer {
 }
 
 function pronamic_db_importer_init() {
-	load_plugin_textdomain('pronamic_db_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
-
 	$GLOBALS['pronamic_db_importer'] = new Pronamic_Database_Importer();
 
 	register_importer(
@@ -63,18 +61,21 @@ class Horses_Legacy_Data {
 		// UPDATE content SET wordpress_imported = FALSE
 
 		$this->pdo->query('ALTER TABLE nieuws ADD wordpress_imported BOOLEAN NOT NULL DEFAULT FALSE;');
+		$this->pdo->query('ALTER TABLE nieuws ADD wordpress_import_attempts INT NOT NULL DEFAULT 0;');
 		$this->pdo->query('ALTER TABLE nieuws ADD wordpress_failed BOOLEAN NOT NULL DEFAULT FALSE;');
 	}
 
 	public function get_post_by_id( $id ) {
 		$query = '
 			SELECT
-				news.nws_id ,  
-				news.nws_title ,  
-				news.nws_url , 
-				news.nws_descr , 
-				news.nws_timestamp ,
-				category.cat_title 
+				news.nws_id,
+				news.nws_title,
+				news.nws_url,
+				news.nws_descr,
+				news.nws_timestamp,
+				news.nws_poster,
+				news.nws_category,
+				category.cat_title
 			FROM
 				nieuws AS news
 					LEFT JOIN
@@ -122,7 +123,9 @@ class Horses_Legacy_Data {
 
 function pronamic_db_importer_create($pdo) {
 	$importer = new Importer();
-	
+
+	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE nws_id = :import_id;' ) );
+
 	$importer->next(new CreatePhpQueryFromPostContent());
 
 	$importer->next(new SetPostStatus('publish'));
@@ -204,6 +207,8 @@ function horses_importer_get_import_info_from_id($pdo, $id) {
 	$importInfo->setDate($date);
 
 	$importInfo->setPostMeta('_import_id', $content->nws_id);
+	$importInfo->setPostMeta('_import_category_id', $content->nws_category);
+	$importInfo->setPostMeta('_import_author_id', $content->nws_poster);
 
 	$importInfo->addTerm(new TermInfo('category', $content->cat_title));
 
@@ -250,12 +255,21 @@ class Pronamic_DatabaseImporter_Plugin {
 	 * Bootstrap the plugin
 	 */
 	public static function bootstrap() {
+		add_action( 'init',           array( __CLASS__, 'init' ) );
+
 		add_action( 'admin_init',     array( __CLASS__, 'admin_init' ) );
 		add_action( 'admin_menu',     array( __CLASS__, 'admin_menu' ) );
 
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 
 		add_filter( 'the_content',    array( __CLASS__, 'the_content' ) );
+	}
+
+	/**
+	 * Initialize
+	 */
+	public static function init() {
+		load_plugin_textdomain( 'pronamic_db_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
@@ -321,7 +335,7 @@ class Pronamic_DatabaseImporter_Plugin {
 		foreach ( $post_types as $post_type ) {
 			add_meta_box( 
 				'pronamic_db_importer_meta_box', // id
-				__( 'Horses Import Data', 'pronamic_db_importer' ), // title
+				__( 'Import Information', 'pronamic_db_importer' ), // title
 				array( __CLASS__, 'meta_box_import' ), // callback
         		$post_type // post_type
     		);
@@ -345,15 +359,42 @@ class Pronamic_DatabaseImporter_Plugin {
 		global $post, $more;
 	
 		if ( $more ) {
+			$id = get_post_meta( $post->ID, '_import_id', true );
 			$url = get_post_meta( $post->ID, '_import_url', true );
+			$author_id = get_post_meta( $post->ID, '_import_author_id', true );
+			$category_id = get_post_meta( $post->ID, '_import_category_id', true );
 		
 			if ( ! empty( $url ) ) {
-				$content .= '<p>';
-				$content .= '	' . __( 'Import URL', 'pronamic_db_importer' );
-				$content .= '	<a href="' . esc_attr( $url ) . '" target="_blank">';
-				$content .= '		' . $url;
-				$content .= '	</a>';
-				$content .= '</p>'; 
+				$content .= '<h2>' . __( 'Import Information', 'pronamic_db_importer' ) . '</h2>';
+
+				$content .= '<dl>';
+				$content .= '	<dt>';
+				$content .= '		' . __( 'ID', 'pronamic_db_importer' );
+				$content .= '	</dt>';
+				$content .= '	<dd>';
+				$content .= '		' . $id;
+				$content .= '	</dd>';
+				$content .= '	<dt>';
+				$content .= '		' . __( 'URL', 'pronamic_db_importer' );
+				$content .= '	</dt>';
+				$content .= '	<dd>';
+				$content .= '		<a href="' . esc_attr( $url ) . '" target="_blank">';
+				$content .= '			' . $url;
+				$content .= '		</a>';
+				$content .= '	</dd>';
+				$content .= '	<dt>';
+				$content .= '		' . __( 'Author ID', 'pronamic_db_importer' );
+				$content .= '	</dt>';
+				$content .= '	<dd>';
+				$content .= '		' . $author_id;
+				$content .= '	</dd>';
+				$content .= '	<dt>';
+				$content .= '		' . __( 'Category ID', 'pronamic_db_importer' );
+				$content .= '	</dt>';
+				$content .= '	<dd>';
+				$content .= '		' . $category_id;
+				$content .= '	</dd>';
+				$content .= '</dl>'; 
 			}
 		}
 	

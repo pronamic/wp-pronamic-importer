@@ -158,7 +158,7 @@ function pronamic_db_importer_create($pdo) {
 
 	$importer->next(new SetPostContent());
 	
-	$importer->next(new TidyContent(array('css-prefix' => 'horses-import')));
+	$importer->next(new TidyContent(array('css-prefix' => 'pronamic-import')));
 
 	$importer->next(new TrimContent());
 
@@ -180,7 +180,7 @@ function pronamic_db_importer_create($pdo) {
 	return $importer;
 }
 
-function horses_importer_get_import_info_from_id($pdo, $id) {
+function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
 	$legacyDataRepository = new Horses_Legacy_Data($pdo);
 
 	$importInfo = new ImportInfo();
@@ -229,16 +229,16 @@ function horses_importer_get_import_info_from_id($pdo, $id) {
 	return $importInfo;
 }
 
-function horses_importer_try_import() {
+function pronamic_db_importer_try_import() {
 	$pdo = Pronamic_DatabaseImporter_Plugin::get_database();
 
 	$importer = pronamic_db_importer_create( $pdo );
 	
 	if(isset($_POST['import-bulk'])) {
-		$ids = filter_input(INPUT_POST, 'horses_ids', FILTER_SANITIZE_STRING, array('flags' => FILTER_REQUIRE_ARRAY));
+		$ids = filter_input(INPUT_POST, 'pronamic_ids', FILTER_SANITIZE_STRING, array('flags' => FILTER_REQUIRE_ARRAY));
 		
 		foreach($ids as $id) {
-			$importInfo = horses_importer_get_import_info_from_id($pdo, $id);
+			$importInfo = pronamic_db_importer_get_import_info_from_id($pdo, $id);
 
 			$importer->start($importInfo);
 		}

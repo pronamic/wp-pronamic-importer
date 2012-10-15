@@ -26,8 +26,8 @@ UPDATE
 SET 
 	guid = REPLACE(
 		guid , 
-		'http://horses-content.beta.pronamic.nl/artikelen/' , 
-		'http://horses-content.beta.pronamic.nl/opinie/'
+		'http://domeinnaam.nl/artikelen/' , 
+		'http://domeinnaam.nl.nl/opinie/'
 	)
 WHERE
 	post_type = 'opinion'

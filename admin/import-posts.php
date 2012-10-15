@@ -2,7 +2,7 @@
 
 $pdo = Pronamic_DatabaseImporter_Plugin::get_database();
 
-horses_importer_try_import(); 
+pronamic_db_importer_try_import(); 
 
 $query = "
 	SELECT
@@ -72,7 +72,7 @@ $statement->bindColumn(6, $category);
 
 				<tr>
 					<th scope="row" class="check-column">
-						<input name="horses_ids[]" value="<?php echo $id; ?>" type="checkbox" /> 
+						<input name="pronamic_ids[]" value="<?php echo $id; ?>" type="checkbox" /> 
 					</th>
 					<td><?php echo $id; ?></td>
 					<td><?php echo $title; ?></td>

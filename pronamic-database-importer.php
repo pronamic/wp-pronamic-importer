@@ -255,14 +255,16 @@ class Pronamic_DatabaseImporter_Plugin {
 	 * Bootstrap the plugin
 	 */
 	public static function bootstrap() {
-		add_action( 'init',           array( __CLASS__, 'init' ) );
+		add_action( 'init',               array( __CLASS__, 'init' ) );
 
-		add_action( 'admin_init',     array( __CLASS__, 'admin_init' ) );
-		add_action( 'admin_menu',     array( __CLASS__, 'admin_menu' ) );
+		add_action( 'admin_init',         array( __CLASS__, 'admin_init' ) );
+		add_action( 'admin_menu',         array( __CLASS__, 'admin_menu' ) );
 
-		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
+		add_action( 'add_meta_boxes',     array( __CLASS__, 'add_meta_boxes' ) );
 
-		add_filter( 'the_content',    array( __CLASS__, 'the_content' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+
+		add_filter( 'the_content',        array( __CLASS__, 'the_content' ) );
 	}
 
 	/**
@@ -350,6 +352,13 @@ class Pronamic_DatabaseImporter_Plugin {
 	}
 
 	/**
+	 * Enqueue scripts
+	 */
+	public static function enqueue_scripts() {
+		wp_enqueue_style( 'pronamic-db-importer', plugins_url( 'includes/css/site.css', __FILE__ ) );
+	}
+
+	/**
 	 * The content
 	 * 
 	 * @param string $content
@@ -359,43 +368,13 @@ class Pronamic_DatabaseImporter_Plugin {
 		global $post, $more;
 	
 		if ( $more ) {
-			$id = get_post_meta( $post->ID, '_import_id', true );
-			$url = get_post_meta( $post->ID, '_import_url', true );
-			$author_id = get_post_meta( $post->ID, '_import_author_id', true );
-			$category_id = get_post_meta( $post->ID, '_import_category_id', true );
-		
-			if ( ! empty( $url ) ) {
-				$content .= '<h2>' . __( 'Import Information', 'pronamic_db_importer' ) . '</h2>';
+			ob_start();
 
-				$content .= '<dl>';
-				$content .= '	<dt>';
-				$content .= '		' . __( 'ID', 'pronamic_db_importer' );
-				$content .= '	</dt>';
-				$content .= '	<dd>';
-				$content .= '		' . $id;
-				$content .= '	</dd>';
-				$content .= '	<dt>';
-				$content .= '		' . __( 'URL', 'pronamic_db_importer' );
-				$content .= '	</dt>';
-				$content .= '	<dd>';
-				$content .= '		<a href="' . esc_attr( $url ) . '" target="_blank">';
-				$content .= '			' . $url;
-				$content .= '		</a>';
-				$content .= '	</dd>';
-				$content .= '	<dt>';
-				$content .= '		' . __( 'Author ID', 'pronamic_db_importer' );
-				$content .= '	</dt>';
-				$content .= '	<dd>';
-				$content .= '		' . $author_id;
-				$content .= '	</dd>';
-				$content .= '	<dt>';
-				$content .= '		' . __( 'Category ID', 'pronamic_db_importer' );
-				$content .= '	</dt>';
-				$content .= '	<dd>';
-				$content .= '		' . $category_id;
-				$content .= '	</dd>';
-				$content .= '</dl>'; 
-			}
+			include 'includes/import-information.php';
+
+			$out = ob_get_clean();
+
+			$content .= $out;
 		}
 	
 		return $content;

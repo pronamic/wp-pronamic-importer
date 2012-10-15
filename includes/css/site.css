@@ -1,0 +1,26 @@
+.pronamic-import-information {
+	background: #F7F7F7;
+
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+
+	border: 1px solid #DDDDDD;
+
+	font-size: 100%;
+
+	padding: 15px;
+}
+
+.pronamic-import-information h2 {
+	font-size: 120%;
+
+	margin: 0;
+}
+
+.pronamic-import-information dl {
+	margin: 0;
+}
+
+.pronamic-import-information dt {
+	font-weight: bold;	
+}

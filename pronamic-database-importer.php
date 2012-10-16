@@ -11,8 +11,8 @@ Text Domain: pronamic_db_importer
 ini_set( 'max_execution_time', 3600 ); // 300 seconds = 5 minutes
 
 require_once ABSPATH . 'wp-admin/includes/import.php';
-require_once __DIR__ . '/phpQuery/phpQuery/phpQuery.php';
-require_once __DIR__ . '/AbsoluteUrl/url_to_absolute.php';
+require_once __DIR__ . '/includes/phpQuery/phpQuery/phpQuery.php';
+require_once __DIR__ . '/includes/AbsoluteUrl/url_to_absolute.php';
 
 if(!class_exists('WP_Importer')) {
 	$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';

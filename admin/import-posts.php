@@ -55,12 +55,12 @@ $statement->bindColumn(6, $category);
 			<t<?php echo $element; ?>>
 				<tr>
 					<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-					<th scope="col"><?php _e('ID', 'bakkeveen_importer'); ?></th>
-					<th scope="col"><?php _e('Title', 'bakkeveen_importer'); ?></th>
-					<th scope="col"><?php _e('URL', 'bakkeveen_importer'); ?></th>
-					<th scope="col"><?php _e('Description', 'bakkeveen_importer'); ?></th>
-					<th scope="col"><?php _e('Timestamp', 'bakkeveen_importer'); ?></th>
-					<th scope="col"><?php _e('Category', 'bakkeveen_importer'); ?></th>
+					<th scope="col"><?php _e( 'ID', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Title', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'URL', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Description', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Timestamp', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Category', 'pronamic_db_importer' ); ?></th>
 				</tr>
 			</t<?php echo $element; ?>>
 
@@ -78,7 +78,7 @@ $statement->bindColumn(6, $category);
 					<td><?php echo $title; ?></td>
 					<td><?php echo $url; ?></td>
 					<td><?php echo htmlspecialchars( stripslashes( $description ) ); ?></td>
-					<td><?php echo date_i18n( __('M j, Y @ G:i', 'bakkeveen_importer'), $timestamp ); ?></td>
+					<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'pronamic_db_importer' ), $timestamp ); ?></td>
 					<td><?php echo $category; ?></td>
 				</tr>
 

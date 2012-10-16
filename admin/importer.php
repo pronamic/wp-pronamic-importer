@@ -2,7 +2,7 @@
 	<?php screen_icon( 'pronamic_db_importer' ); ?>
 
 	<h2>
-		<?php _e( 'Database Importer', 'bakkeveen_importer' ); ?>
+		<?php _e( 'Database Importer', 'pronamic_db_importer' ); ?>
 	</h2>
 
 	<ul>

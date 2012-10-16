@@ -6,6 +6,7 @@ SELECT
 	news.nws_timestamp AS import_date,
 	news.nws_poster AS import_author_id,
 	"post" AS import_type,
+	news.nws_category AS import_category_id,
 	category.cat_title AS import_category_name
 FROM
 	nieuws AS news
@@ -13,17 +14,5 @@ FROM
 	category AS category
 			ON news.nws_category = category.cat_id
 WHERE
-	nws_url = ""
-		AND
-	nws_descr != ""
-		AND
-	nws_timestamp IS NOT NULL
-		AND
-	wordpress_imported = 0
-		AND
-	wordpress_import_attempts = 0
-ORDER BY
-	news.nws_timestamp ASC
-LIMIT
-	0, 100
+	news.nws_id = :id
 ;

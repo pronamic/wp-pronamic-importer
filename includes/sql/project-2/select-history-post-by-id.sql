@@ -9,8 +9,6 @@ SELECT
 	"" AS import_category_name
 FROM 
 	historie_data AS hd
-ORDER BY
-	hd.timestamp ASC
-LIMIT
-	0, 100
+WHERE
+	hd.id = :id
 ;

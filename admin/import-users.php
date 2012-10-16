@@ -1,6 +1,6 @@
 <?php 
 
-$pdo = Pronamic_DatabaseImporter_Plugin::get_database();
+$pdo = Pronamic_Importer_Plugin::get_database();
 
 ?>
 

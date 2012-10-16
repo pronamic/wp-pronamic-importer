@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Pronamic Database Importer
+Plugin Name: Pronamic Importer
 Description: Import posts, pages, comments, custom fields, categories, tags and more from the Horses database.
 Author: pronamic
 Author URI: http://pronamic.eu/
@@ -10,97 +10,20 @@ Text Domain: pronamic_db_importer
 
 ini_set( 'max_execution_time', 3600 ); // 300 seconds = 5 minutes
 
-require_once ABSPATH . 'wp-admin/includes/import.php';
-require_once __DIR__ . '/includes/phpQuery/phpQuery/phpQuery.php';
-require_once __DIR__ . '/includes/AbsoluteUrl/url_to_absolute.php';
-
-if(!class_exists('WP_Importer')) {
-	$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-	if(file_exists($class_wp_importer))
-		require $class_wp_importer;
-}
 
 function pronamic_db_importer_autoload($name) {
 	$file = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . $name . '.php';
-	$file = str_replace('\\', DIRECTORY_SEPARATOR, $file);
+	$file = str_replace( '\\', DIRECTORY_SEPARATOR, $file );
 
-	if(is_readable($file)) {
+	if ( is_readable( $file ) ) {
 		require_once $file;
 	}
 }
 
-spl_autoload_register('pronamic_db_importer_autoload');
+spl_autoload_register( 'pronamic_db_importer_autoload' );
 
-class Pronamic_Database_Importer extends WP_Importer {
-	public function dispatch() {
-		include 'admin/importer.php';
-	}
-}
 
 //
-
-class Horses_Legacy_Data {
-	private $pdo;
-
-	public function __construct($pdo) {
-		$this->pdo = $pdo;		
-	}
-
-	public function get_post_by_id( $id ) {
-		$query = '
-			SELECT
-				news.nws_id,
-				news.nws_title,
-				news.nws_url,
-				news.nws_descr,
-				news.nws_timestamp,
-				news.nws_poster,
-				news.nws_category,
-				category.cat_title
-			FROM
-				nieuws AS news
-					LEFT JOIN
-				category AS category
-						ON news.nws_category = category.cat_id
-			WHERE
-				news.nws_id = :id
-			;
-		';
-	
-		$statement = $this->pdo->prepare($query);
-		$statement->bindValue(':id', $id, PDO::PARAM_INT);
-		$statement->execute();
-	
-		$content = $statement->fetchAll(PDO::FETCH_OBJ);
-		$content = array_shift($content);
-		
-		return $content;
-	}
-
-	public function get_images_for_post_id( $id ) {
-		$query = '
-			SELECT
-				image.img_id ,  
-				image.img_name , 
-				image.img_descr
-			FROM
-				images AS image
-			WHERE
-				image.img_nws_id = :id
-			ORDER BY
-				image.img_volgnummer
-			;
-		';
-	
-		$statement = $this->pdo->prepare($query);
-		$statement->bindValue(':id', $id, PDO::PARAM_INT);
-		$statement->execute();
-	
-		$content = $statement->fetchAll(PDO::FETCH_OBJ);
-
-		return $content;
-	}
-}
 
 function pronamic_db_importer_create($pdo) {
 	$importer = new Importer();
@@ -162,7 +85,7 @@ function pronamic_db_importer_create($pdo) {
 }
 
 function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
-	$legacyDataRepository = new Horses_Legacy_Data($pdo);
+	$legacyDataRepository = new Pronamic_Importer_Data($pdo);
 
 	$importInfo = new ImportInfo();
 
@@ -170,39 +93,36 @@ function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
 
 	$url = sprintf(
 		'http://www.bakkeveen.nl/item/%d/%s.html' ,
-		$content->nws_id ,
-		sanitize_title( $content->nws_title )
+		$content->import_id ,
+		sanitize_title( $content->import_title )
 	);
 
 	$importInfo->setUrl($url);
 
-	$importInfo->setPostData('post_title', $content->nws_title);
-	$importInfo->setPostData( 'post_content', $content->nws_descr );
+	$importInfo->setPostData( 'post_title', $content->import_title );
+	$importInfo->setPostData( 'post_content', $content->import_content );
+	$importInfo->setPostData( 'post_type', $content->import_type );
 	
-	$timezoneUtc = new DateTimeZone('UTC');
-	$timezoneAms = new DateTimeZone('Europe/Amsterdam');
+	$timezoneUtc = new DateTimeZone( 'UTC' );
+	$timezoneAms = new DateTimeZone( 'Europe/Amsterdam' );
 	
-	$date = new DateTime('@' . $content->nws_timestamp, $timezoneUtc);
-	$date->setTimezone($timezoneAms);
+	$date = new DateTime( '@' . $content->import_date, $timezoneUtc );
+	$date->setTimezone( $timezoneAms );
 
-	$importInfo->setDate($date);
+	$importInfo->setDate( $date );
 
-	$importInfo->setPostMeta('_import_id', $content->nws_id);
-	$importInfo->setPostMeta('_import_category_id', $content->nws_category);
-	$importInfo->setPostMeta('_import_author_id', $content->nws_poster);
+	$importInfo->setPostMeta( '_import_id', $content->import_id );
+	$importInfo->setPostMeta( '_import_category_id', $content->import_category_id );
+	$importInfo->setPostMeta( '_import_author_id', $content->import_author_id );
 
-	$importInfo->addTerm(new TermInfo('category', $content->cat_title));
+	$importInfo->addTerm( new TermInfo( 'category', $content->import_category_name ) );
 
-	$images = $legacyDataRepository->get_images_for_post_id( $content->nws_id );
+	$images = $legacyDataRepository->get_images_for_post_id( $content->import_id );
 	foreach ( $images as $image ) {
-		$url = sprintf(
-			'http://www.bakkeveen.nl/i/items/%d.jpg',
-			$image->img_id
-		);
-
-		$media = new ImportInfo( $url );
-		$media->setPostData( 'post_content', $image->img_descr );
-		$media->setPostMeta( '_import_url', $url );
+		$media = new ImportInfo( $image->import_url );
+		$media->setPostData( 'post_content', $image->import_content );
+		$media->setPostMeta( '_import_id',   $image->import_id );
+		$media->setPostMeta( '_import_url',  $image->import_url );
 
 		$importInfo->addMedia( $media );
 	}
@@ -211,12 +131,12 @@ function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
 }
 
 function pronamic_db_importer_try_import() {
-	$pdo = Pronamic_DatabaseImporter_Plugin::get_database();
+	$pdo = Pronamic_Importer_Plugin::get_database();
 
 	$importer = pronamic_db_importer_create( $pdo );
 	
 	if ( isset( $_POST['import-bulk'] ) ) {
-		$ids = filter_input( INPUT_POST, 'pronamic_ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
+		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
 		
 		foreach ( $ids as $id ) {
 			$importInfo = pronamic_db_importer_get_import_info_from_id( $pdo, $id );
@@ -231,11 +151,18 @@ function pronamic_db_importer_try_import() {
  * 
  * @author Remco
  */
-class Pronamic_DatabaseImporter_Plugin {
+class Pronamic_Importer_Plugin {
+	public static $file;
+	
+	public static $dirname;
+
 	/**
 	 * Bootstrap the plugin
 	 */
-	public static function bootstrap() {
+	public static function bootstrap( $file ) {
+		self::$file    = $file;
+		self::$dirname = dirname( $file );
+
 		add_action( 'init',               array( __CLASS__, 'init' ) );
 
 		add_action( 'admin_init',         array( __CLASS__, 'admin_init' ) );
@@ -253,19 +180,32 @@ class Pronamic_DatabaseImporter_Plugin {
 	 */
 	public static function init() {
 		load_plugin_textdomain( 'pronamic_db_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+		// Requirements
+
+		// WordPress import - http://codex.wordpress.org/Function_Reference/register_importer
+		require_once ABSPATH . '/wp-admin/includes/import.php';
+		require_once ABSPATH . '/wp-admin/includes/class-wp-importer.php';
+		// Pronamic
+		require_once self::$dirname . '/classes/Pronamic/Importer/Importer.php';
+		require_once self::$dirname . '/classes/Pronamic/Importer/Data.php';
+		// phpQuery - http://code.google.com/p/phpquery/
+		require_once self::$dirname . '/includes/phpQuery/phpQuery/phpQuery.php';
+		// UrlToAbsolute - http://sourceforge.net/projects/absoluteurl
+		require_once self::$dirname . '/includes/AbsoluteUrl/url_to_absolute.php';
 	}
 
 	/**
 	 * Admin initialize
 	 */
 	public static function admin_init() {
-		$GLOBALS['pronamic_db_importer'] = $importer = new Pronamic_Database_Importer();
+		$GLOBALS['pronamic_db_importer'] = $importer = new Pronamic_Importer_Importer();
 
 		// Register importer
 		register_importer(
 			'pronamic_db_importer',
-			__( 'Pronamic Database Importer', 'pronamic_db_importer' ),
-			__( 'Import <strong>posts, pages, comments, custom fields, categories, and tags</strong> from an custom database.', 'pronamic_db_importer' ),
+			__( 'Pronamic Importer', 'pronamic_db_importer' ),
+			__( 'Import <strong>posts, pages, comments, custom fields, categories, and tags</strong>.', 'pronamic_db_importer' ),
 			array( $importer, 'dispatch' ) 
 		);		
 
@@ -373,4 +313,4 @@ class Pronamic_DatabaseImporter_Plugin {
 	}
 }
 
-Pronamic_DatabaseImporter_Plugin::bootstrap();
+Pronamic_Importer_Plugin::bootstrap( __FILE__ );

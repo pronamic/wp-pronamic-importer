@@ -1,11 +1,11 @@
 <?php 
 
-$pdo = Pronamic_DatabaseImporter_Plugin::get_database();
+$pdo = Pronamic_Importer_Plugin::get_database();
 
 pronamic_db_importer_try_import(); 
 
 $query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-posts.sql' );
-$query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-history-posts.sql' );
+// $query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-history-posts.sql' );
 
 $statement = $pdo->prepare( $query );
 
@@ -16,8 +16,9 @@ $statement->bindColumn( 2, $title );
 $statement->bindColumn( 3, $url );
 $statement->bindColumn( 4, $description );
 $statement->bindColumn( 5, $timestamp );
-$statement->bindColumn( 6, $post_type );
-$statement->bindColumn( 7, $category );
+$statement->bindColumn( 6, $author_id );
+$statement->bindColumn( 7, $post_type );
+$statement->bindColumn( 8, $category );
 
 ?>
 <form method="post" action="">
@@ -26,7 +27,7 @@ $statement->bindColumn( 7, $category );
 
 	<table cellspacing="0" class="widefat fixed">
 
-		<?php foreach(array('head', 'foot') as $element): ?>
+		<?php foreach ( array( 'head', 'foot' ) as $element ): ?>
 
 			<t<?php echo $element; ?>>
 				<tr>
@@ -36,6 +37,7 @@ $statement->bindColumn( 7, $category );
 					<th scope="col"><?php _e( 'URL', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Description', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Date', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Author ID', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Post Type', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Category', 'pronamic_db_importer' ); ?></th>
 				</tr>
@@ -45,11 +47,11 @@ $statement->bindColumn( 7, $category );
 		
 		<tbody>
 
-			<?php while($row = $statement->fetch(PDO::FETCH_BOUND)): ?>
+			<?php while ( $row = $statement->fetch( PDO::FETCH_BOUND ) ): ?>
 
 				<tr>
 					<th scope="row" class="check-column">
-						<input name="pronamic_ids[]" value="<?php echo $id; ?>" type="checkbox" /> 
+						<input name="ids[]" value="<?php echo $id; ?>" type="checkbox" /> 
 					</th>
 					<td><?php echo $id; ?></td>
 					<td><?php echo $title; ?></td>
@@ -60,6 +62,7 @@ $statement->bindColumn( 7, $category );
 					</td>
 					<td><?php echo htmlspecialchars( stripslashes( $description ) ); ?></td>
 					<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'pronamic_db_importer' ), $timestamp ); ?></td>
+					<td><?php echo $author_id; ?></td>
 					<td><?php echo $post_type; ?></td>
 					<td><?php echo $category; ?></td>
 				</tr>

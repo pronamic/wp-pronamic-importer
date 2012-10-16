@@ -4,44 +4,20 @@ $pdo = Pronamic_DatabaseImporter_Plugin::get_database();
 
 pronamic_db_importer_try_import(); 
 
-$query = "
-	SELECT
-		news.nws_id ,  
-		news.nws_title ,  
-		news.nws_url , 
-		news.nws_descr , 
-		news.nws_timestamp ,
-		category.cat_title 
-	FROM
-		nieuws AS news
-			LEFT JOIN
-		category AS category
-				ON news.nws_category = category.cat_id
-	WHERE
-		nws_url = ''
-			AND
-		nws_descr != ''
-			AND
-		nws_timestamp IS NOT NULL 
-			AND
-		wordpress_imported = 0
-			AND
-		wordpress_import_attempts = 0
-	ORDER BY
-		news.nws_timestamp ASC
-	LIMIT
-		0, 100;
-";
+$query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-posts.sql' );
+$query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-history-posts.sql' );
 
-$statement = $pdo->prepare($query);
-$statement->execute(array('nieuws'));
+$statement = $pdo->prepare( $query );
 
-$statement->bindColumn(1, $id);
-$statement->bindColumn(2, $title);
-$statement->bindColumn(3, $url);
-$statement->bindColumn(4, $description);
-$statement->bindColumn(5, $timestamp);
-$statement->bindColumn(6, $category);
+$result = $statement->execute();
+
+$statement->bindColumn( 1, $id );
+$statement->bindColumn( 2, $title );
+$statement->bindColumn( 3, $url );
+$statement->bindColumn( 4, $description );
+$statement->bindColumn( 5, $timestamp );
+$statement->bindColumn( 6, $post_type );
+$statement->bindColumn( 7, $category );
 
 ?>
 <form method="post" action="">
@@ -59,7 +35,8 @@ $statement->bindColumn(6, $category);
 					<th scope="col"><?php _e( 'Title', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'URL', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Description', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Timestamp', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Date', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Post Type', 'pronamic_db_importer' ); ?></th>
 					<th scope="col"><?php _e( 'Category', 'pronamic_db_importer' ); ?></th>
 				</tr>
 			</t<?php echo $element; ?>>
@@ -76,9 +53,14 @@ $statement->bindColumn(6, $category);
 					</th>
 					<td><?php echo $id; ?></td>
 					<td><?php echo $title; ?></td>
-					<td><?php echo $url; ?></td>
+					<td>
+						<a href="<?php echo $url; ?>" target="_blank">
+							<?php echo $url; ?>
+						</a>
+					</td>
 					<td><?php echo htmlspecialchars( stripslashes( $description ) ); ?></td>
 					<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'pronamic_db_importer' ), $timestamp ); ?></td>
+					<td><?php echo $post_type; ?></td>
 					<td><?php echo $category; ?></td>
 				</tr>
 

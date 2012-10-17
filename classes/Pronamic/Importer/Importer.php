@@ -4,4 +4,63 @@ class Pronamic_Importer_Importer extends WP_Importer {
 	public function dispatch() {
 		include Pronamic_Importer_Plugin::$dirname . '/admin/importer.php';
 	}
+
+	public static function get_default_importer( $pdo ) {
+		$importer = new Importer();
+	
+		$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE nws_id = :import_id;' ) );
+	
+		$importer->next(new CreatePhpQueryFromPostContent());
+	
+		$importer->next(new SetPostStatus('publish'));
+	
+		$importer->next(new SetMetaImportUrl('_import_url'));
+	
+		$importer->next(new SetDateIfNotSet());
+		$importer->next(new SetPostDate());
+	
+		$importer->next(new ConvertRelativeUrlToAbsolute('img', 'src'));
+		$importer->next(new ConvertRelativeUrlToAbsolute('a', 'href'));
+	
+		$importer->next(new SetPostContent());
+		
+		$importer->next(new RemoveElements('p:empty'));
+	
+		$importer->next(new FindPostThumbnail('this:has(img):first'));
+		
+		$importer->next(new FindImagesInContent());
+	
+		$importer->next(new SetPostThumbnailIfNotSet());
+	
+		$importer->next(new DownloadMedia());
+		
+		$importer->next(new InsertPost());
+		$importer->next(new InsertAttachments());
+	
+		$importer->next(new UpdateImageSource());
+		$importer->next(new UpdateFileLink());
+	
+		$importer->next(new SetPostContent());
+		
+		$importer->next(new TidyContent(array('css-prefix' => 'pronamic-import')));
+	
+		$importer->next(new TrimContent());
+	
+		$importer->next(new UpdatePost());
+		
+		$importer->next(new AddPostMeta());
+		$importer->next(new SetPostTerms());
+		
+		$importer->next(new InsertComments());
+	
+		$importer->next(new DeleteTemporaryFiles());
+		
+		$importer->next(new VarDumpImport());
+	
+		$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_imported = TRUE WHERE nws_id = :import_id;'));
+	
+		$importer->next(new Done());
+	
+		return $importer;
+	}
 }

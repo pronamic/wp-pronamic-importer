@@ -8,9 +8,6 @@ Version: 0.1
 Text Domain: pronamic_importer
 */
 
-ini_set( 'max_execution_time', 3600 ); // 300 seconds = 5 minutes
-
-
 function pronamic_importer_autoload($name) {
 	$file = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . $name . '.php';
 	$file = str_replace( '\\', DIRECTORY_SEPARATOR, $file );
@@ -22,74 +19,14 @@ function pronamic_importer_autoload($name) {
 
 spl_autoload_register( 'pronamic_importer_autoload' );
 
-
 //
 
-function pronamic_importer_create($pdo) {
-	$importer = new Importer();
-
-	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE nws_id = :import_id;' ) );
-
-	$importer->next(new CreatePhpQueryFromPostContent());
-
-	$importer->next(new SetPostStatus('publish'));
-
-	$importer->next(new SetMetaImportUrl('_import_url'));
-
-	$importer->next(new SetDateIfNotSet());
-	$importer->next(new SetPostDate());
-
-	$importer->next(new ConvertRelativeUrlToAbsolute('img', 'src'));
-	$importer->next(new ConvertRelativeUrlToAbsolute('a', 'href'));
-
-	$importer->next(new SetPostContent());
-	
-	$importer->next(new RemoveElements('p:empty'));
-
-	$importer->next(new FindPostThumbnail('this:has(img):first'));
-	
-	$importer->next(new FindImagesInContent());
-
-	$importer->next(new SetPostThumbnailIfNotSet());
-
-	$importer->next(new DownloadMedia());
-	
-	$importer->next(new InsertPost());
-	$importer->next(new InsertAttachments());
-
-	$importer->next(new UpdateImageSource());
-	$importer->next(new UpdateFileLink());
-
-	$importer->next(new SetPostContent());
-	
-	$importer->next(new TidyContent(array('css-prefix' => 'pronamic-import')));
-
-	$importer->next(new TrimContent());
-
-	$importer->next(new UpdatePost());
-	
-	$importer->next(new AddPostMeta());
-	$importer->next(new SetPostTerms());
-	
-	$importer->next(new InsertComments());
-
-	$importer->next(new DeleteTemporaryFiles());
-	
-	$importer->next(new VarDumpImport());
-
-	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_imported = TRUE WHERE nws_id = :import_id;'));
-
-	$importer->next(new Done());
-
-	return $importer;
-}
-
 function pronamic_importer_get_import_info_from_id($pdo, $id) {
-	$legacyDataRepository = new Pronamic_Importer_Data($pdo);
+	$data = new Pronamic_Importer_Data($pdo);
 
-	$importInfo = new ImportInfo();
+	$import_post = new ImportInfo();
 
-	$content = $legacyDataRepository->get_post_by_id($id);
+	$content = $data->get_post_by_id( $id );
 
 	$url = sprintf(
 		'http://www.bakkeveen.nl/item/%d/%s.html' ,
@@ -97,43 +34,39 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 		sanitize_title( $content->import_title )
 	);
 
-	$importInfo->setUrl($url);
+	$import_post->setUrl( $url );
 
-	$importInfo->setPostData( 'post_title', $content->import_title );
-	$importInfo->setPostData( 'post_content', $content->import_content );
-	$importInfo->setPostData( 'post_type', $content->import_type );
+	$import_post->setPostData( 'post_title', $content->import_title );
+	$import_post->setPostData( 'post_content', $content->import_content );
+	$import_post->setPostData( 'post_type', $content->import_type );
 	
-	$timezoneUtc = new DateTimeZone( 'UTC' );
-	$timezoneAms = new DateTimeZone( 'Europe/Amsterdam' );
-	
-	$date = new DateTime( '@' . $content->import_date, $timezoneUtc );
-	$date->setTimezone( $timezoneAms );
+	$date = Pronamic_Importer_Util_DateTime::convert_timestamp( $content->import_date, 'UTC', 'Europe/Amsterdam' );
 
-	$importInfo->setDate( $date );
+	$import_post->setDate( $date );
 
-	$importInfo->setPostMeta( '_import_id', $content->import_id );
-	$importInfo->setPostMeta( '_import_category_id', $content->import_category_id );
-	$importInfo->setPostMeta( '_import_author_id', $content->import_author_id );
+	$import_post->setPostMeta( '_import_id', $content->import_id );
+	$import_post->setPostMeta( '_import_category_id', $content->import_category_id );
+	$import_post->setPostMeta( '_import_author_id', $content->import_author_id );
 
-	$importInfo->addTerm( new TermInfo( 'category', $content->import_category_name ) );
+	$import_post->addTerm( new TermInfo( 'category', $content->import_category_name ) );
 
-	$images = $legacyDataRepository->get_images_for_post_id( $content->import_id );
-	foreach ( $images as $image ) {
-		$media = new ImportInfo( $image->import_url );
-		$media->setPostData( 'post_content', $image->import_content );
-		$media->setPostMeta( '_import_id',   $image->import_id );
-		$media->setPostMeta( '_import_url',  $image->import_url );
+	$attachments = $data->get_attachments_for_post_id( $content->import_id );
+	foreach ( $attachments as $attachment ) {
+		$import_attachment = new ImportInfo( $image->import_url );
+		$import_attachment->setPostData( 'post_content', $image->import_content );
+		$import_attachment->setPostMeta( '_import_id',   $image->import_id );
+		$import_attachment->setPostMeta( '_import_url',  $image->import_url );
 
-		$importInfo->addMedia( $media );
+		$import_post->addMedia( $import_attachment );
 	}
 
-	return $importInfo;
+	return $import_post;
 }
 
 function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 
-	$importer = pronamic_importer_create( $pdo );
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo );
 	
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
@@ -181,6 +114,9 @@ class Pronamic_Importer_Plugin {
 	public static function init() {
 		load_plugin_textdomain( 'pronamic_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
+		// Time limit
+		set_time_limit( 0 );
+
 		// Requirements
 
 		// WordPress import - http://codex.wordpress.org/Function_Reference/register_importer
@@ -189,6 +125,7 @@ class Pronamic_Importer_Plugin {
 		// Pronamic
 		require_once self::$dirname . '/classes/Pronamic/Importer/Importer.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Data.php';
+		require_once self::$dirname . '/classes/Pronamic/Importer/Util/DateTime.php';
 		// phpQuery - http://code.google.com/p/phpquery/
 		require_once self::$dirname . '/includes/phpQuery/phpQuery/phpQuery.php';
 		// UrlToAbsolute - http://sourceforge.net/projects/absoluteurl
@@ -221,8 +158,8 @@ class Pronamic_Importer_Plugin {
 	 */
 	public static function admin_menu() {
 		add_management_page( 
-			__( 'Database Import', 'pronamic_importer' ), // page_title
-			__( 'Database Import', 'pronamic_importer' ), // menu_title
+			__( 'Pronamic Import', 'pronamic_importer' ), // page_title
+			__( 'Pronamic Import', 'pronamic_importer' ), // menu_title
 			'manage_options', // capability
 			'pronamic_importer', // menu_slug
 			array( __CLASS__, 'page_importer' ) // function

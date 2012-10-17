@@ -85,9 +85,21 @@ function pronamic_importer_try_import() {
  * @author Remco
  */
 class Pronamic_Importer_Plugin {
+	/**
+	 * Plugin filename
+	 * 
+	 * @var stromg
+	 */
 	public static $file;
 	
+	/**
+	 * Plugin dirname
+	 * 
+	 * @var string
+	 */
 	public static $dirname;
+
+	//////////////////////////////////////////////////
 
 	/**
 	 * Bootstrap the plugin
@@ -107,6 +119,8 @@ class Pronamic_Importer_Plugin {
 
 		add_filter( 'the_content',        array( __CLASS__, 'the_content' ) );
 	}
+
+	//////////////////////////////////////////////////
 
 	/**
 	 * Initialize
@@ -152,6 +166,8 @@ class Pronamic_Importer_Plugin {
 		register_setting( 'pronamic_importer', 'pronamic_importer_db_password' );
 		register_setting( 'pronamic_importer', 'pronamic_importer_db_host' );
 	}
+
+	//////////////////////////////////////////////////
 
 	/**
 	 * Admin menu
@@ -226,6 +242,8 @@ class Pronamic_Importer_Plugin {
 	public static function enqueue_scripts() {
 		wp_enqueue_style( 'pronamic-importer', plugins_url( 'includes/css/site.css', __FILE__ ) );
 	}
+
+	//////////////////////////////////////////////////
 
 	/**
 	 * The content

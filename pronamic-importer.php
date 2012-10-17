@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Pronamic Importer
-Description: Import posts, pages, comments, custom fields, categories, tags and more from the Horses database.
+Description: Import posts, pages, comments, custom fields, categories, tags and more.
 Author: pronamic
 Author URI: http://pronamic.eu/
 Version: 0.1

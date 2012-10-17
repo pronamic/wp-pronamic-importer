@@ -5,13 +5,13 @@ Description: Import posts, pages, comments, custom fields, categories, tags and 
 Author: pronamic
 Author URI: http://pronamic.eu/
 Version: 0.1
-Text Domain: pronamic_db_importer
+Text Domain: pronamic_importer
 */
 
 ini_set( 'max_execution_time', 3600 ); // 300 seconds = 5 minutes
 
 
-function pronamic_db_importer_autoload($name) {
+function pronamic_importer_autoload($name) {
 	$file = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . $name . '.php';
 	$file = str_replace( '\\', DIRECTORY_SEPARATOR, $file );
 
@@ -20,12 +20,12 @@ function pronamic_db_importer_autoload($name) {
 	}
 }
 
-spl_autoload_register( 'pronamic_db_importer_autoload' );
+spl_autoload_register( 'pronamic_importer_autoload' );
 
 
 //
 
-function pronamic_db_importer_create($pdo) {
+function pronamic_importer_create($pdo) {
 	$importer = new Importer();
 
 	$importer->next(new ExecuteQuery($pdo, 'UPDATE nieuws SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE nws_id = :import_id;' ) );
@@ -84,7 +84,7 @@ function pronamic_db_importer_create($pdo) {
 	return $importer;
 }
 
-function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
+function pronamic_importer_get_import_info_from_id($pdo, $id) {
 	$legacyDataRepository = new Pronamic_Importer_Data($pdo);
 
 	$importInfo = new ImportInfo();
@@ -130,16 +130,16 @@ function pronamic_db_importer_get_import_info_from_id($pdo, $id) {
 	return $importInfo;
 }
 
-function pronamic_db_importer_try_import() {
+function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 
-	$importer = pronamic_db_importer_create( $pdo );
+	$importer = pronamic_importer_create( $pdo );
 	
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
 		
 		foreach ( $ids as $id ) {
-			$importInfo = pronamic_db_importer_get_import_info_from_id( $pdo, $id );
+			$importInfo = pronamic_importer_get_import_info_from_id( $pdo, $id );
 
 			$importer->start( $importInfo );
 		}
@@ -179,7 +179,7 @@ class Pronamic_Importer_Plugin {
 	 * Initialize
 	 */
 	public static function init() {
-		load_plugin_textdomain( 'pronamic_db_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'pronamic_importer', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		// Requirements
 
@@ -199,21 +199,21 @@ class Pronamic_Importer_Plugin {
 	 * Admin initialize
 	 */
 	public static function admin_init() {
-		$GLOBALS['pronamic_db_importer'] = $importer = new Pronamic_Importer_Importer();
+		$GLOBALS['pronamic_importer'] = $importer = new Pronamic_Importer_Importer();
 
 		// Register importer
 		register_importer(
-			'pronamic_db_importer',
-			__( 'Pronamic Importer', 'pronamic_db_importer' ),
-			__( 'Import <strong>posts, pages, comments, custom fields, categories, and tags</strong>.', 'pronamic_db_importer' ),
+			'pronamic_importer',
+			__( 'Pronamic Importer', 'pronamic_importer' ),
+			__( 'Import <strong>posts, pages, comments, custom fields, categories, and tags</strong>.', 'pronamic_importer' ),
 			array( $importer, 'dispatch' ) 
 		);		
 
 		// Register settings
-		register_setting( 'pronamic_db_importer', 'pronamic_db_importer_name' );
-		register_setting( 'pronamic_db_importer', 'pronamic_db_importer_user' );
-		register_setting( 'pronamic_db_importer', 'pronamic_db_importer_password' );
-		register_setting( 'pronamic_db_importer', 'pronamic_db_importer_host' );
+		register_setting( 'pronamic_importer', 'pronamic_importer_db_name' );
+		register_setting( 'pronamic_importer', 'pronamic_importer_db_user' );
+		register_setting( 'pronamic_importer', 'pronamic_importer_db_password' );
+		register_setting( 'pronamic_importer', 'pronamic_importer_db_host' );
 	}
 
 	/**
@@ -221,10 +221,10 @@ class Pronamic_Importer_Plugin {
 	 */
 	public static function admin_menu() {
 		add_management_page( 
-			__( 'Database Import', 'pronamic_db_importer' ), // page_title
-			__( 'Database Import', 'pronamic_db_importer' ), // menu_title
+			__( 'Database Import', 'pronamic_importer' ), // page_title
+			__( 'Database Import', 'pronamic_importer' ), // menu_title
 			'manage_options', // capability
-			'pronamic_db_importer', // menu_slug
+			'pronamic_importer', // menu_slug
 			array( __CLASS__, 'page_importer' ) // function
 		);
 	}
@@ -243,10 +243,10 @@ class Pronamic_Importer_Plugin {
 		global $pronamic_importer_db;
 
 		if ( ! isset( $pronamic_importer_db ) ) {
-			$name     = get_option( 'pronamic_db_importer_name' );
-			$user     = get_option( 'pronamic_db_importer_user' );
-			$password = get_option( 'pronamic_db_importer_password' );
-			$host     = get_option( 'pronamic_db_importer_host' );
+			$name     = get_option( 'pronamic_importer_db_name' );
+			$user     = get_option( 'pronamic_importer_db_user' );
+			$password = get_option( 'pronamic_importer_db_password' );
+			$host     = get_option( 'pronamic_importer_db_host' );
 
 			$dsn = sprintf( 
 				'mysql:dbname=%s;host=%s;charset=UTF-8',
@@ -268,8 +268,8 @@ class Pronamic_Importer_Plugin {
 
 		foreach ( $post_types as $post_type ) {
 			add_meta_box( 
-				'pronamic_db_importer_meta_box', // id
-				__( 'Import Information', 'pronamic_db_importer' ), // title
+				'pronamic_importer_meta_box', // id
+				__( 'Import Information', 'pronamic_importer' ), // title
 				array( __CLASS__, 'meta_box_import' ), // callback
         		$post_type // post_type
     		);
@@ -287,7 +287,7 @@ class Pronamic_Importer_Plugin {
 	 * Enqueue scripts
 	 */
 	public static function enqueue_scripts() {
-		wp_enqueue_style( 'pronamic-db-importer', plugins_url( 'includes/css/site.css', __FILE__ ) );
+		wp_enqueue_style( 'pronamic-importer', plugins_url( 'includes/css/site.css', __FILE__ ) );
 	}
 
 	/**

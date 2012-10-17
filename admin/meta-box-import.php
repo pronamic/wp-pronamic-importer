@@ -7,7 +7,7 @@ global $post;
 	<tbody>
 		<tr>
 			<th scope="row">
-				<?php _e( 'ID', 'pronamic_db_importer' ); ?>
+				<?php _e( 'ID', 'pronamic_importer' ); ?>
 			</th>
 			<td>
 				<?php echo get_post_meta( $post->ID, '_import_id', true ); ?>
@@ -15,7 +15,7 @@ global $post;
 		</tr>
 		<tr>
 			<th scope="row">
-				<?php _e( 'URL', 'pronamic_db_importer' ); ?>
+				<?php _e( 'URL', 'pronamic_importer' ); ?>
 			</th>
 			<td>
 				<?php $url = get_post_meta( $post->ID, '_import_url', true ); ?>

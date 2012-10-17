@@ -1,19 +1,19 @@
 <div class="wrap">
-	<?php screen_icon( 'pronamic_db_importer' ); ?>
+	<?php screen_icon( 'pronamic_importer' ); ?>
 
 	<h2>
-		<?php _e( 'Database Importer', 'pronamic_db_importer' ); ?>
+		<?php _e( 'Database Importer', 'pronamic_importer' ); ?>
 	</h2>
 
 	<ul>
 		<li>
 			<a href="<?php echo add_query_arg( 'view', 'posts' ); ?>">
-				<?php _e( 'Posts', 'pronamic_db_importer' ); ?>
+				<?php _e( 'Posts', 'pronamic_importer' ); ?>
 			</a>
 		</li>
 		<li>
 			<a href="<?php echo add_query_arg( 'view', 'users' ); ?>">
-				<?php _e( 'Users', 'pronamic_db_importer' ); ?>
+				<?php _e( 'Users', 'pronamic_importer' ); ?>
 			</a>
 		</li>
 	</ul>

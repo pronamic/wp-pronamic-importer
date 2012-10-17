@@ -5,7 +5,7 @@ $pdo = Pronamic_Importer_Plugin::get_database();
 ?>
 
 <h3>
-	<?php _e( 'Users', 'pronamic_db_importer' ); ?>	
+	<?php _e( 'Users', 'pronamic_importer' ); ?>	
 </h3>
 
 <?php
@@ -51,15 +51,15 @@ $statement->bindColumn( 8, $name );
 			<t<?php echo $element; ?>>
 				<tr>
 					<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-					<th scope="col"><?php _e( 'ID', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Username', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Password', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Level', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Category', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Display Name', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'E-Mail', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Name', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Import', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'ID', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Username', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Password', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Level', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Category', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Display Name', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'E-Mail', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Name', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Import', 'pronamic_importer' ); ?></th>
 				</tr>
 			</t<?php echo $element; ?>>
 

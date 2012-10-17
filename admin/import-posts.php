@@ -2,7 +2,7 @@
 
 $pdo = Pronamic_Importer_Plugin::get_database();
 
-pronamic_db_importer_try_import(); 
+pronamic_importer_try_import(); 
 
 $query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-posts.sql' );
 // $query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-history-posts.sql' );
@@ -32,14 +32,14 @@ $statement->bindColumn( 8, $category );
 			<t<?php echo $element; ?>>
 				<tr>
 					<th scope="col" id="cb" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-					<th scope="col"><?php _e( 'ID', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Title', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'URL', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Description', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Date', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Author ID', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Post Type', 'pronamic_db_importer' ); ?></th>
-					<th scope="col"><?php _e( 'Category', 'pronamic_db_importer' ); ?></th>
+					<th scope="col"><?php _e( 'ID', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Title', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'URL', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Description', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Date', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Author ID', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Post Type', 'pronamic_importer' ); ?></th>
+					<th scope="col"><?php _e( 'Category', 'pronamic_importer' ); ?></th>
 				</tr>
 			</t<?php echo $element; ?>>
 
@@ -61,7 +61,7 @@ $statement->bindColumn( 8, $category );
 						</a>
 					</td>
 					<td><?php echo htmlspecialchars( stripslashes( $description ) ); ?></td>
-					<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'pronamic_db_importer' ), $timestamp ); ?></td>
+					<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'pronamic_importer' ), $timestamp ); ?></td>
 					<td><?php echo $author_id; ?></td>
 					<td><?php echo $post_type; ?></td>
 					<td><?php echo $category; ?></td>

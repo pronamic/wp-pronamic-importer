@@ -6,11 +6,11 @@ Requires at least: 3.0
 Tested up to: 3.4
 Stable tag: 0.1
 
-Import posts, pages, comments, custom fields, categories, tags and more from an custom database.
+Import posts, pages, comments, custom fields, categories, tags and more.
 
 == Description ==
 
-The WordPress Importer can import the following content from an custom database:
+The Pronamic Importer plugin can import the following content from an custom database:
 
 * Posts, pages and other custom post types
 * Comments

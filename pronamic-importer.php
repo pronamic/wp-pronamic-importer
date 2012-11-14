@@ -52,10 +52,10 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 
 	$attachments = $data->get_attachments_for_post_id( $content->import_id );
 	foreach ( $attachments as $attachment ) {
-		$import_attachment = new ImportInfo( $image->import_url );
-		$import_attachment->setPostData( 'post_content', $image->import_content );
-		$import_attachment->setPostMeta( '_import_id',   $image->import_id );
-		$import_attachment->setPostMeta( '_import_url',  $image->import_url );
+		$import_attachment = new ImportInfo( $attachment->import_url );
+		$import_attachment->setPostData( 'post_content', $attachment->import_content );
+		$import_attachment->setPostMeta( '_import_id',   $attachment->import_id );
+		$import_attachment->setPostMeta( '_import_url',  $attachment->import_url );
 
 		$import_post->addMedia( $import_attachment );
 	}
@@ -140,6 +140,7 @@ class Pronamic_Importer_Plugin {
 		require_once self::$dirname . '/classes/Pronamic/Importer/Importer.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Data.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Util/DateTime.php';
+		require_once self::$dirname . '/classes/Pronamic/Importer/Actions/StripSlashesPostData.php';
 		// phpQuery - http://code.google.com/p/phpquery/
 		require_once self::$dirname . '/includes/phpQuery/phpQuery/phpQuery.php';
 		// UrlToAbsolute - http://sourceforge.net/projects/absoluteurl

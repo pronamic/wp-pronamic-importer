@@ -6,10 +6,10 @@ class DownloadMedia extends ImportAction {
 			$url = $media->getUrl();
 			$url = str_replace(' ', '%20', $url);
 
-			$import->log(sprintf('Downloading %s &hellip;', $url));
+			$import->log(sprintf('Downloading "%s" &hellip;', $url));
 
 			if(is_readable($media->file)) {
-				$import->log(sprintf('Media file already available %s &hellip;', $url));
+				$import->log(sprintf('Media file already available "%s" &hellip;', $url));
 			} else {
 				$result = download_url($url);
 

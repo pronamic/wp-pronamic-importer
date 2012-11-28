@@ -16,6 +16,11 @@
 				<?php _e( 'Users', 'pronamic_importer' ); ?>
 			</a>
 		</li>
+		<li>
+			<a href="<?php echo add_query_arg( 'view', 'comments' ); ?>">
+				<?php _e( 'Comments', 'pronamic_importer' ); ?>
+			</a>
+		</li>
 	</ul>
 
 	<?php 
@@ -29,6 +34,10 @@
 			break;
 		case 'users':
 			include 'import-users.php';
+			
+			break;
+		case 'comments':
+			include 'import-comments.php';
 			
 			break;
 	}

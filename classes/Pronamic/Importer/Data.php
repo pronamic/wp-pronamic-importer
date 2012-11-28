@@ -7,27 +7,43 @@ class Pronamic_Importer_Data {
 		$this->pdo = $pdo;		
 	}
 
-	public function get_post_by_id( $id ) {
-		$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-post-by-id.sql' );
-
-		$statement = $this->pdo->prepare($query);
-		$statement->bindValue(':id', $id, PDO::PARAM_INT);
+	public function get_post_by_id( $query, $id ) {
+		$statement = $this->pdo->prepare( $query );
+		$statement->bindValue( ':id', $id, PDO::PARAM_INT );
 		$statement->execute();
 
-		$content = $statement->fetchAll(PDO::FETCH_OBJ);
-		$content = array_shift($content);
+		$content = $statement->fetchAll( PDO::FETCH_OBJ );
+		$content = array_shift( $content );
 
 		return $content;
 	}
 
-	public function get_attachments_for_post_id( $id ) {
-		$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-attachments-by-post-id.sql' );
-	
-		$statement = $this->pdo->prepare($query);
-		$statement->bindValue(':id', $id, PDO::PARAM_INT);
+	public function get_attachments_for_post_id( $query, $id ) {	
+		$statement = $this->pdo->prepare( $query );
+		$statement->bindValue( ':id', $id, PDO::PARAM_INT );
 		$statement->execute();
 	
-		$content = $statement->fetchAll(PDO::FETCH_OBJ);
+		$content = $statement->fetchAll( PDO::FETCH_OBJ );
+
+		return $content;
+	}
+
+	public function get_meta_for_post_id( $query, $id ) {	
+		$statement = $this->pdo->prepare( $query );
+		$statement->bindValue( ':id', $id, PDO::PARAM_INT );
+		$statement->execute();
+	
+		$content = $statement->fetchAll( PDO::FETCH_OBJ );
+
+		return $content;
+	}
+
+	public function get_terms_for_post_id( $query, $id ) {	
+		$statement = $this->pdo->prepare( $query );
+		$statement->bindValue( ':id', $id, PDO::PARAM_INT );
+		$statement->execute();
+	
+		$content = $statement->fetchAll( PDO::FETCH_OBJ );
 
 		return $content;
 	}

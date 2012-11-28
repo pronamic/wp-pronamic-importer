@@ -9,6 +9,10 @@ SELECT
 	"" AS import_category_name
 FROM 
 	historie_data AS hd
+WHERE
+	wordpress_imported = 0
+		AND
+	wordpress_import_attempts = 0
 ORDER BY
 	hd.timestamp ASC
 LIMIT

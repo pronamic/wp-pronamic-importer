@@ -23,10 +23,10 @@ class Pronamic_Importer_Importer extends WP_Importer {
 	 * 
 	 * @param PDO $pdo
 	 */
-	public static function get_default_importer( $pdo ) {
+	public static function get_default_importer( $pdo, $table, $field_id ) {
 		$importer = new Importer();
 	
-		$importer->next( new ExecuteQuery( $pdo, 'UPDATE nieuws SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE nws_id = :import_id;' ) );
+		$importer->next( new ExecuteQuery( $pdo, sprintf( 'UPDATE %s SET wordpress_import_attempts = wordpress_import_attempts + 1 WHERE %s = :import_id;', $table, $field_id ) ) );
 	
 		$importer->next( new CreatePhpQueryFromPostContent() );
 	
@@ -78,7 +78,7 @@ class Pronamic_Importer_Importer extends WP_Importer {
 		
 		$importer->next( new VarDumpImport() );
 	
-		$importer->next( new ExecuteQuery( $pdo, 'UPDATE nieuws SET wordpress_imported = TRUE WHERE nws_id = :import_id;' ) );
+		$importer->next( new ExecuteQuery( $pdo, sprintf( 'UPDATE %s SET wordpress_imported = TRUE WHERE %s = :import_id;', $table, $field_id ) ) );
 	
 		$importer->next( new Done() );
 	

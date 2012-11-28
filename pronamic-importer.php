@@ -26,11 +26,17 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 
 	$import_post = new ImportInfo();
 
-	$content = $data->get_post_by_id( $id );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-post-by-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-history-post-by-id.sql' );
+	
+	$content = $data->get_post_by_id( $query, $id );
+
+	$url = 'http://www.bakkeveen.nl/item/%d/%s.html';
+	$url = 'http://www.bakkeveen.nl/historie/item/%d/%s.html';
 
 	$url = sprintf(
-		'http://www.bakkeveen.nl/item/%d/%s.html' ,
-		$content->import_id ,
+		$url,
+		$content->import_id,
 		sanitize_title( $content->import_title )
 	);
 
@@ -45,12 +51,21 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 	$import_post->setDate( $date );
 
 	$import_post->setPostMeta( '_import_id', $content->import_id );
-	$import_post->setPostMeta( '_import_category_id', $content->import_category_id );
 	$import_post->setPostMeta( '_import_author_id', $content->import_author_id );
+	
+	if ( isset( $content->import_category_id ) ) {
+		$import_post->setPostMeta( '_import_category_id', $content->import_category_id );
+	}
 
-	$import_post->addTerm( new TermInfo( 'category', $content->import_category_name ) );
+	if ( !empty( $content->import_category_name ) ) {
+		$import_post->addTerm( new TermInfo( 'category', $content->import_category_name ) );
+	}
 
-	$attachments = $data->get_attachments_for_post_id( $content->import_id );
+	// Attachments
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-attachments-by-post-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-attachments-by-history-post-id.sql' );
+
+	$attachments = $data->get_attachments_for_post_id( $query, $content->import_id );
 	foreach ( $attachments as $attachment ) {
 		$import_attachment = new ImportInfo( $attachment->import_url );
 		$import_attachment->setPostData( 'post_content', $attachment->import_content );
@@ -60,22 +75,43 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 		$import_post->addMedia( $import_attachment );
 	}
 
+	// Meta
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-meta-by-history-post-id.sql' );
+
+	$meta = $data->get_meta_for_post_id( $query, $content->import_id );
+	foreach ( $meta as $meta_data ) {
+		$import_post->setPostMeta( $meta_data->meta_key, $meta_data->meta_value );
+	}
+
+	// Terms
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-terms-by-history-post-id.sql' );
+
+	$terms = $data->get_terms_for_post_id( $query, $content->import_id );
+	foreach ( $terms as $term_data ) {
+		$import_post->addTerm( new TermInfo( $term_data->taxonomy, $term_data->term ) );
+	}
+
 	return $import_post;
 }
 
 function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 
-	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo );
-	
+	// $importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'nieuws', 'nws_id' );
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'historie_data', 'id' );
+
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
 		
+		echo '<div style="height: 500px; overflow: auto">';
+
 		foreach ( $ids as $id ) {
 			$importInfo = pronamic_importer_get_import_info_from_id( $pdo, $id );
 
 			$importer->start( $importInfo );
 		}
+		
+		echo '</div>';
 	}
 }
 
@@ -117,7 +153,7 @@ class Pronamic_Importer_Plugin {
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 
-		add_filter( 'the_content',        array( __CLASS__, 'the_content' ) );
+		add_filter( 'the_content',        array( __CLASS__, 'the_content' ), 50 );
 	}
 
 	//////////////////////////////////////////////////

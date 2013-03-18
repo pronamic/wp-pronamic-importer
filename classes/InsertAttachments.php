@@ -44,8 +44,8 @@ class InsertAttachments extends ImportAction {
 			$name = urldecode($name);
 
 			$ext = pathinfo($name, PATHINFO_EXTENSION);
-
-			if(empty($ext)) {
+			
+			if(empty($ext) || in_array( $ext, array( 'php' ) ) ) {
 				$finfo = new finfo(FILEINFO_MIME);
 
 				$mime = $finfo->file($attachment->file);

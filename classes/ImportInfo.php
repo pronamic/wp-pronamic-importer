@@ -244,7 +244,7 @@ class ImportInfo {
 	 * @param mixed $term
 	 */
 	public function addTerm(TermInfo $term) {
-		if(isset($this->taxonomies[$term->taxonomy])) {
+		if ( ! isset( $this->taxonomies[$term->taxonomy] ) ) {
 			$this->taxonomies[$term->taxonomy] = array();
 		}
 

@@ -56,7 +56,7 @@ class SetPostTerms extends ImportAction {
 
 	public function terms(array $terms) {
 		foreach($terms as $termInfo) {
-			$parentId = 0;
+			$parentId = '';
 			if(isset($termInfo->parent)) {
 				$parentId = $termInfo->parent->id;
 			}
@@ -88,7 +88,7 @@ class SetPostTerms extends ImportAction {
 	
 	public function getIds($terms, $ids = array()) {
 		foreach($terms as $term) {
-			$ids[] = $term->id;
+			$ids[] = intval( $term->id );
 
 			$ids = $this->getIds($term->children, $ids);
 		}

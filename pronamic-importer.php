@@ -26,13 +26,11 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 
 	$import_post = new ImportInfo();
 
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-post-by-id.sql' );
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-history-post-by-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-3/select-post-by-id.sql' );
 	
 	$content = $data->get_post_by_id( $query, $id );
 
-	$url = 'http://www.bakkeveen.nl/item/%d/%s.html';
-	$url = 'http://www.bakkeveen.nl/historie/item/%d/%s.html';
+	$url = 'http://www.bestelauto.nl/%d-%s.html';
 
 	$url = sprintf(
 		$url,
@@ -62,8 +60,7 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 	}
 
 	// Attachments
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-attachments-by-post-id.sql' );
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-attachments-by-history-post-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-3/select-attachments-by-post-id.sql' );
 
 	$attachments = $data->get_attachments_for_post_id( $query, $content->import_id );
 	foreach ( $attachments as $attachment ) {
@@ -76,7 +73,7 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 	}
 
 	// Meta
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-meta-by-history-post-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-3/select-meta-by-post-id.sql' );
 
 	$meta = $data->get_meta_for_post_id( $query, $content->import_id );
 	foreach ( $meta as $meta_data ) {
@@ -84,7 +81,7 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 	}
 
 	// Terms
-	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-2/select-terms-by-history-post-id.sql' );
+	$query = file_get_contents( Pronamic_Importer_Plugin::$dirname . '/includes/sql/project-3/select-terms-by-post-id.sql' );
 
 	$terms = $data->get_terms_for_post_id( $query, $content->import_id );
 	foreach ( $terms as $term_data ) {
@@ -97,8 +94,7 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 
-	// $importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'nieuws', 'nws_id' );
-	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'historie_data', 'id' );
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'pages', 'id' );
 
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );

@@ -4,8 +4,7 @@ $pdo = Pronamic_Importer_Plugin::get_database();
 
 pronamic_importer_try_import(); 
 
-// $query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-posts.sql' );
-$query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-2/select-history-posts.sql' );
+$query = file_get_contents( dirname( __FILE__ ) . '/../includes/sql/project-3/select-posts.sql' );
 
 $statement = $pdo->prepare( $query );
 

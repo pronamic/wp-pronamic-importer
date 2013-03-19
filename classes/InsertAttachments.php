@@ -50,12 +50,12 @@ class InsertAttachments extends ImportAction {
 
 				$mime = $finfo->file($attachment->file);
 
-				$name = str_replace( '.' . $ext, '', $name );
+				$ext_new = 	self::mimeToExt($mime);
 
-				$ext = 	self::mimeToExt($mime);
+				if ( $ext_new !== false ) {
+					$name = str_replace( '.' . $ext, '', $name );
 
-				if($ext !== false) {
-					$name .= '.' . $ext;
+					$name .= '.' . $ext_new;
 				}
 			}
 	

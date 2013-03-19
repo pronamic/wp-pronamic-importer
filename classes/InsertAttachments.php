@@ -45,10 +45,12 @@ class InsertAttachments extends ImportAction {
 
 			$ext = pathinfo($name, PATHINFO_EXTENSION);
 			
-			if(empty($ext) || in_array( $ext, array( 'php' ) ) ) {
+			if ( empty( $ext ) || in_array( $ext, array( 'php' ) ) ) {
 				$finfo = new finfo(FILEINFO_MIME);
 
 				$mime = $finfo->file($attachment->file);
+
+				$name = str_replace( '.' . $ext, '', $name );
 
 				$ext = 	self::mimeToExt($mime);
 

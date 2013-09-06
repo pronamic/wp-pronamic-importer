@@ -45,6 +45,10 @@ class InsertAttachments extends ImportAction {
 
 			$ext = pathinfo($name, PATHINFO_EXTENSION);
 			
+			if(isset($attachment->attachmentFileName)) {
+				$name = $attachment->attachmentFileName;
+			}
+			
 			if ( empty( $ext ) || in_array( $ext, array( 'php' ) ) ) {
 				$finfo = new finfo(FILEINFO_MIME);
 
@@ -53,8 +57,14 @@ class InsertAttachments extends ImportAction {
 				$ext_new = 	self::mimeToExt($mime);
 
 				if ( $ext_new !== false ) {
-					$name = str_replace( '.' . $ext, '', $name );
-
+					$replace_extensions = array(
+						'.' . $ext_new
+					);
+					
+					if ( ! empty( $ext ) )
+						$replace_extensions[] = '.' . $ext;
+					
+					$name = str_replace( $replace_extensions, '', $name );
 					$name .= '.' . $ext_new;
 				}
 			}
@@ -76,10 +86,14 @@ class InsertAttachments extends ImportAction {
 			 */
 			$import->log(sprintf('Storing "<strong>%s</strong>" in upload directory (time: "<strong>%s</strong>")', $name, $date->format('Y/m')));
 	
-			$bits = file_get_contents($attachment->file);
-
+			if (empty($attachment->file)) {
+				$bits = file_get_contents(Pronamic_Importer_Plugin::get_placeholder());
+			} else {
+				$bits = file_get_contents($attachment->file);
+			}
+			
 			$result = wp_upload_bits($name, null, $bits, $date->format('Y/m'));
-	
+			
 			if($result['error'] === false) { // no error
 				$import->log(sprintf('Stored file: <a href="%s">%s</a>', $result['url'], $result['url']));
 
@@ -149,6 +163,8 @@ class InsertAttachments extends ImportAction {
 				} else {
 					$import->log(sprintf('Failed updating attachment meta data'));
 				}
+				
+				do_action( 'pronamic_importer_after_insert_attachment', $postId, $result, $attachment );
 				
 				// Meta
 				$action = new AddPostMeta();

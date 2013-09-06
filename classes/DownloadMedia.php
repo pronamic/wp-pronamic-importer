@@ -27,7 +27,7 @@ class DownloadMedia extends ImportAction {
 			$this->next($import);
 		} else {
 			$import->log('Failed downloading all media');
-			//$this->next($import);
+			$this->next($import);
 		}
 	}
 }

@@ -11,7 +11,7 @@ Text Domain: pronamic_importer
 function pronamic_importer_autoload($name) {
 	$file = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . $name . '.php';
 	$file = str_replace( '\\', DIRECTORY_SEPARATOR, $file );
-
+	
 	if ( is_readable( $file ) ) {
 		require_once $file;
 	}
@@ -93,18 +93,22 @@ function pronamic_importer_get_import_info_from_id($pdo, $id) {
 
 function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
-
-	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'pages', 'id' );
+	$view = filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING );
+	
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'event', 'id' );
 
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
 		
 		echo '<div style="height: 500px; overflow: auto">';
 
+		$importing = Pronamic_Importer_ImportingFactory::get( $view );
+		
 		foreach ( $ids as $id ) {
-			$importInfo = pronamic_importer_get_import_info_from_id( $pdo, $id );
+			
+			
 
-			$importer->start( $importInfo );
+			$importer->start( $importing->get( $id ) );
 		}
 		
 		echo '</div>';
@@ -170,6 +174,7 @@ class Pronamic_Importer_Plugin {
 		require_once ABSPATH . '/wp-admin/includes/class-wp-importer.php';
 		// Pronamic
 		require_once self::$dirname . '/classes/Pronamic/Importer/Importer.php';
+		require_once self::$dirname . '/classes/Pronamic/Importer/ImportingFactory.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Data.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Util/DateTime.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Actions/StripSlashesPostData.php';
@@ -276,6 +281,10 @@ class Pronamic_Importer_Plugin {
 		wp_enqueue_style( 'pronamic-importer', plugins_url( 'includes/css/site.css', __FILE__ ) );
 	}
 
+	public static function get_placeholder() {
+		return apply_filters( 'pronamic_importer_placeholder_path', plugin_dir_path( self::$file ) . '/includes/placeholder.gif' );
+	}
+	
 	//////////////////////////////////////////////////
 
 	/**

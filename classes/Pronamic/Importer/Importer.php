@@ -50,7 +50,8 @@ class Pronamic_Importer_Importer extends WP_Importer {
 		$importer->next( new FindPostThumbnail( 'this:has(img):first' ) );
 		
 		$importer->next( new FindImagesInContent() );
-	
+		$importer->next( new FindFilesInContent() );
+		
 		$importer->next( new SetPostThumbnailIfNotSet() );
 	
 		$importer->next( new DownloadMedia() );
@@ -66,7 +67,7 @@ class Pronamic_Importer_Importer extends WP_Importer {
 		$importer->next( new TidyContent( array( 'css-prefix' => 'pronamic-import' ) ) );
 	
 		$importer->next( new TrimContent() );
-	
+	// iframe importer
 		$importer->next( new UpdatePost() );
 		
 		$importer->next( new AddPostMeta() );

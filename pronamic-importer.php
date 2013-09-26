@@ -95,7 +95,7 @@ function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 	$view = filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING );
 	
-	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'event', 'id' );
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'node', 'id' );
 
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );

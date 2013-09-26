@@ -14,19 +14,39 @@
 		</li>
 		<?php endforeach; ?>
 	</ul>
+	
+	
 
 	<?php if ( filter_has_var( INPUT_GET, 'view' ) ) : ?>
+	
+		<div>
+			<form method="POST">
+				<h3><?php _e( 'Single Import', 'pronamic_importer' ); ?></h3>
+				<input type="text" name="ids[]"/>
+				<span class="howto">
+					<?php _e( '<strong>WARNING</strong> This will just get this specific ID, and wont adhear to any specific query WHERE statements in the table shown below', 'pronamic_importer' ); ?>
+				</span>
+				<?php submit_button( 'Single Import', 'primary', 'import-bulk' ); ?>
+			</form>
+		</div>
+	
 		<?php 
+		
+		// Attempt to import
 		pronamic_importer_try_import();
+		
 		// Passed variables
 		$view = filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING ); 
 		$limit = ( filter_has_var( INPUT_GET, 'limit' ) ? filter_input( INPUT_GET, 'limit', FILTER_VALIDATE_INT ) : 500 );
 		$offset = ( filter_has_var( INPUT_GET, 'offset' ) ? filter_input( INPUT_GET, 'offset', FILTER_VALIDATE_INT ) : 0 );
 		
+		// Get the selected view importer
 		$importer = Pronamic_Importer_ImportingFactory::get( $view );
 		
+		// Get all the rows
 		$rows = $importer->get_all( $limit, $offset );
 		
+		// Get the keys
 		$first_key = key( $rows );
 		$array_keys = array_keys( $rows[$first_key] );
 		

@@ -47,18 +47,18 @@ class Pronamic_Importer_Importer extends WP_Importer {
 		
 		$importer->next( new RemoveElements( 'p:empty' ) );
 	
-		$importer->next( new FindPostThumbnail( 'this:has(img):first' ) );
+		$importer->next( new FindPostThumbnail( 'img:first' ) );
 		
 		$importer->next( new FindImagesInContent() );
 		$importer->next( new FindFilesInContent() );
 		
-		$importer->next( new SetPostThumbnailIfNotSet() );
+		//$importer->next( new SetPostThumbnailIfNotSet() );
 	
 		$importer->next( new DownloadMedia() );
 		
 		$importer->next( new InsertPost() );
 		$importer->next( new InsertAttachments() );
-	
+			
 		$importer->next( new UpdateImageSource() );
 		$importer->next( new UpdateFileLink() );
 	

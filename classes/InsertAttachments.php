@@ -132,8 +132,10 @@ class InsertAttachments extends ImportAction {
 
 				$attachmentId = wp_insert_attachment($attachment->post, $result['file'], $postId);
 
-				if($import->thumbnail->getUrl() == $url) {
-					$import->setPostMeta('_thumbnail_id', $attachmentId);
+				if ( isset( $import->thumbnail ) && method_exists( $import->thumbnail, 'getUrl' ) ) {
+					if($import->thumbnail->getUrl() == $url) {
+						$import->setPostMeta('_thumbnail_id', $attachmentId);
+					}
 				}
 
 				$attachment->setPostId($attachmentId);

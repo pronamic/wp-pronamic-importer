@@ -52,7 +52,7 @@ class Pronamic_Importer_Importer extends WP_Importer {
 		$importer->next( new FindImagesInContent() );
 		$importer->next( new FindFilesInContent() );
 		
-		//$importer->next( new SetPostThumbnailIfNotSet() );
+		$importer->next( new SetPostThumbnailIfNotSet() );
 	
 		$importer->next( new DownloadMedia() );
 		

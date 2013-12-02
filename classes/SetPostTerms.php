@@ -55,33 +55,33 @@ class SetPostTerms extends ImportAction {
 	}
 
 	public function terms(array $terms) {
+		// Go through each TermInfo
 		foreach($terms as $termInfo) {
-			$parentId = '';
+			
+			// Set the parent TermInfo properties ID.
+			$parentId = 0;
 			if(isset($termInfo->parent)) {
 				$parentId = $termInfo->parent->id;
 			}
 
-			$result = bouwmedia_term_exists($termInfo->name, $termInfo->taxonomy, $parentId);
-
-			if(empty($result)) {
-				$result = wp_insert_term(
-					$termInfo->name , 
-					$termInfo->taxonomy , 
-					array(
-						'parent' => $parentId
-					)
-				);
-			}
-
-			if(is_wp_error($result)) {
-				echo '<pre>';
-				var_dump($termInfo);
-				var_dump($result);
-				echo '</pre>';
+			// Determine if the term already exists
+			$existing_term = term_exists($termInfo->name, $termInfo->taxonomy);
+			
+			if( 0 == $existing_term ) {
+				// No term found, add it, and get the result id
+				$result = wp_insert_term( $termInfo->name, $termInfo->taxonomy, array( 'parent' => $parentId ) );
+				
+				if ( ! is_wp_error( $result ) ) {
+					$termInfo->id = $result['term_id'];
+				}
 			} else {
-				$termInfo->id = $result['term_id'];
+				
+				//$existing_term_id = $existing_term['term_id'];
+				$termInfo->id = $existing_term['term_id'];
+				
+				//wp_update_term( $existing_term_id, $termInfo->taxonomy, array( 'parent' => $parentId ) );
 			}
-
+			
 			$this->terms($termInfo->children);
 		}
 	}

@@ -22,9 +22,11 @@ class SetPostThumbnailIfNotSet extends ImportAction {
 				$import->log(sprintf('Post thumbnail is set'));
 			}
 
-			$this->next($import);
+			
 		} else {
 			$import->log( 'This Import has been specified to not guess the thumbnail' );
 		}
+		
+		$this->next($import);
 	}
 }

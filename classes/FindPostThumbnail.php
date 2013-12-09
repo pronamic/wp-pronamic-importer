@@ -14,7 +14,7 @@ class FindPostThumbnail extends ImportAction {
 
 		$import->log(sprintf('Found "<strong>%d</strong>" post thumbnails elements', $image->length));
 
-		if($image->length > 0) {
+		if($image->length > 0 && ! $import->hasDefinedThumbnail() ) {
 			$url = $image->attr('src');
 			
 			$import->log(sprintf('Found image: "<strong>%s</strong>"', $url));

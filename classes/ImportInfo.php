@@ -57,6 +57,8 @@ class ImportInfo {
 	public $media;
 
 	public $thumbnail;
+	
+	private $definedThumbnail = false;
 
 	////////////////////////////////////////////////////////////
 
@@ -276,6 +278,18 @@ class ImportInfo {
 		}
 
 		return $downloaded;
+	}
+	
+	public function doesHaveDefinedThumbnail() {
+		$this->definedThumbnail = true;
+	}
+	
+	public function doesntHaveDefinedThumbnail() {
+		$this->definedThumbnail = false;
+	}
+	
+	public function hasDefinedThumbnail() {
+		return (bool) $this->definedThumbnail;
 	}
 
 	////////////////////////////////////////////////////////////

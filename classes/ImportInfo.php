@@ -59,6 +59,7 @@ class ImportInfo {
 	public $thumbnail;
 	
 	private $definedThumbnail = false;
+	private $guessThumbnail = true;
 
 	////////////////////////////////////////////////////////////
 
@@ -290,6 +291,14 @@ class ImportInfo {
 	
 	public function hasDefinedThumbnail() {
 		return (bool) $this->definedThumbnail;
+	}
+	
+	public function dontGuessThumbnail() {
+		$this->guessThumbnail = false;
+	}
+	
+	public function shouldGuessThumbnail() {
+		return (bool) $this->guessThumbnail;
 	}
 
 	////////////////////////////////////////////////////////////

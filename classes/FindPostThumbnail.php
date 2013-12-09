@@ -14,7 +14,7 @@ class FindPostThumbnail extends ImportAction {
 
 		$import->log(sprintf('Found "<strong>%d</strong>" post thumbnails elements', $image->length));
 
-		if($image->length > 0 && ! $import->hasDefinedThumbnail() ) {
+		if($image->length > 0 && ! $import->hasDefinedThumbnail() && $import->shouldGuessThumbnail() ) {
 			$url = $image->attr('src');
 			
 			$import->log(sprintf('Found image: "<strong>%s</strong>"', $url));
@@ -27,6 +27,12 @@ class FindPostThumbnail extends ImportAction {
 			
 			$import->addMedia($photo);
 			$import->setThumbnail($photo);
+		} else {
+			if ( $import->hasDefinedThumbnail() )
+				$import->log( 'This Import has a specific thumbnail' );
+			
+			if ( ! $import->shouldGuessThumbnail() )
+				$import->log( 'This Import has been specified to not guess the thumbnail' );
 		}
 
 		$this->next($import);

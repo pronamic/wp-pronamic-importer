@@ -33,7 +33,8 @@
 		<?php 
 		
 		// Attempt to import
-		pronamic_importer_try_import();
+		if ( false === pronamic_importer_try_import() )
+            return;
 		
 		// Passed variables
 		$view = filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING ); 

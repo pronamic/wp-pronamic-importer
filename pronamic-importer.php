@@ -95,8 +95,16 @@ function pronamic_importer_try_import() {
 	$pdo = Pronamic_Importer_Plugin::get_database();
 	$view = filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING );
 	
-	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, 'node', 'id' );
-
+    // Get the config for this view.
+    if ( ! Pronamic_Importer_ImportingFactory::has_config( $view ) )
+        return false;
+    
+    // Get the config for this view
+    $config = Pronamic_Importer_ImportingFactory::get_config( $view );
+    
+    // Get the importer based off the configs table name and primary key column
+	$importer = Pronamic_Importer_Importer::get_default_importer( $pdo, $config->get_table_name(), $config->get_pk_column() );
+    
 	if ( isset( $_POST['import-bulk'] ) ) {
 		$ids = filter_input( INPUT_POST, 'ids', FILTER_SANITIZE_STRING, array( 'flags' => FILTER_REQUIRE_ARRAY ) );
 		
@@ -105,9 +113,6 @@ function pronamic_importer_try_import() {
 		$importing = Pronamic_Importer_ImportingFactory::get( $view );
 		
 		foreach ( $ids as $id ) {
-			
-			
-
 			$importer->start( $importing->get( $id ) );
 		}
 		
@@ -175,9 +180,12 @@ class Pronamic_Importer_Plugin {
 		// Pronamic
 		require_once self::$dirname . '/classes/Pronamic/Importer/Importer.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/ImportingFactory.php';
+        require_once self::$dirname . '/classes/Pronamic/Importer/Config.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Data.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Util/DateTime.php';
 		require_once self::$dirname . '/classes/Pronamic/Importer/Actions/StripSlashesPostData.php';
+        
+        require_once self::$dirname . '/classes/Pronamic/Importer/WordPress/Post.php';
 		// phpQuery - http://code.google.com/p/phpquery/
 		require_once self::$dirname . '/includes/phpQuery/phpQuery/phpQuery.php';
 		// UrlToAbsolute - http://sourceforge.net/projects/absoluteurl
@@ -240,7 +248,7 @@ class Pronamic_Importer_Plugin {
 			$host     = get_option( 'pronamic_importer_db_host' );
 
 			$dsn = sprintf( 
-				'mysql:dbname=%s;host=%s;charset=UTF-8',
+				'mysql:dbname=%s;host=%s',
 				$name,
 				$host
 			);

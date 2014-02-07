@@ -4,9 +4,9 @@ class FindFilesInContent extends ImportAction {
 	public function process(ImportInfo $import) {
 		$import->log(sprintf('Searching for files in post content &hellip;'));
 
-		$anchors = $import->contentElement->find('a[href*="kwpn.nl"]');
+		$anchors = $import->contentElement->find('a[href*=""]');
 
-		$import->log(sprintf('Found <strong>%d</strong> kwpn.nl links in post content &hellip;', $anchors->length));
+		$import->log(sprintf('Found <strong>%d</strong> links in post content &hellip;', $anchors->length));
 		
 		$extensions = array(
 			'.pdf',

@@ -269,6 +269,7 @@ class ImportInfo {
 
 	public function setThumbnail(self $media) {
 		$this->thumbnail = $media;
+        $this->media[$media->getUrl()] = $media;
 	}
 
 	public function isMediaDownloaded() {

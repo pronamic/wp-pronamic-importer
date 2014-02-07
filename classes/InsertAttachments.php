@@ -172,6 +172,8 @@ class InsertAttachments extends ImportAction {
 				$action = new AddPostMeta();
 				$action->process($attachment);
 
+                $import->media[$i]->attachment = $attachment;
+                
 				$import->log(sprintf('Succesfully imported attachment'));
 			} else {
 				echo '<pre>';
